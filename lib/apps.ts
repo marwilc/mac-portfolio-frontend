@@ -1,4 +1,4 @@
-export type AppId = "finder" | "about" | "projects" | "contact" | "apps";
+export type AppId = "finder" | "about" | "projects" | "contact" | "apps" | "resume";
 
 export type AppConfig = {
   id: AppId;
@@ -12,4 +12,5 @@ export const APPS: AppConfig[] = [
   { id: "projects", name: "Projects", icon: "💻" },
   { id: "contact", name: "Contact", icon: "✉️" },
   { id: "apps", name: "Applications", icon: "🚀" },
+  { id: "resume", name: "Resume", icon: "📄" },
 ];

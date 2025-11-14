@@ -262,16 +262,17 @@ export default function AppWindow({
       onMouseDown={handleWindowClick}
     >
       {/* Barra superior tipo macOS 2025 (tema oscuro) - área de arrastre */}
-      <div
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          handleTitleBarMouseDown(e);
-        }}
-        onDoubleClick={handleTitleBarDoubleClick}
-        className={`flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-gray-800/50 ${
-          isFullscreen ? "rounded-none" : "rounded-t-2xl"
-        } select-none`}
-      >
+      {title && (
+        <div
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            handleTitleBarMouseDown(e);
+          }}
+          onDoubleClick={handleTitleBarDoubleClick}
+          className={`flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-gray-800/50 ${
+            isFullscreen ? "rounded-none" : "rounded-t-2xl"
+          } select-none`}
+        >
         <div className="flex gap-2">
           <button
             aria-label="Close"
@@ -292,11 +293,18 @@ export default function AppWindow({
         <span className="text-sm font-medium text-white/90">{title}</span>
         <div className="w-12" />
       </div>
+      )}
 
       {/* Contenido */}
       <div
-        className={`p-6 overflow-auto text-sm text-gray-100 ${
-          isFullscreen ? "h-[calc(100vh-3rem)]" : hasCustomSize ? "h-[calc(100%-3rem)]" : "max-h-[60vh]"
+        className={`${title ? "p-6" : "p-0"} overflow-auto text-sm text-gray-100 ${
+          title
+            ? isFullscreen
+              ? "h-[calc(100vh-3rem)]"
+              : hasCustomSize
+              ? "h-[calc(100%-3rem)]"
+              : "max-h-[60vh]"
+            : "h-full"
         }`}
       >
         {children}

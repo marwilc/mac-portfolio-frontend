@@ -4,8 +4,13 @@ import { useState, useEffect } from "react";
 import Dock from "./Dock";
 import AppWindow from "./AppWindow";
 import DesktopIcon from "./DesktopIcon";
+import Launchpad from "./Launchpad";
+import MenuBar from "./MenuBar";
+import AppleMenu from "./AppleMenu";
+import ShutdownDialog from "./ShutdownDialog";
 import type { AppId } from "@/lib/apps";
 import { APPS } from "@/lib/apps";
+import type { UserApp } from "@/lib/userApps";
 
 type WindowPosition = {
   x: number;
@@ -26,6 +31,7 @@ export default function Desktop() {
     projects: { x: 0, y: 0 },
     contact: { x: 0, y: 0 },
     apps: { x: 0, y: 0 },
+    resume: { x: 0, y: 0 },
   });
   const [windowSizes, setWindowSizes] = useState<Record<AppId, WindowSize>>({
     finder: { width: 0, height: 0 },
@@ -33,6 +39,7 @@ export default function Desktop() {
     projects: { width: 0, height: 0 },
     contact: { width: 0, height: 0 },
     apps: { width: 0, height: 0 },
+    resume: { width: 0, height: 0 },
   });
   const [windowOriginalSizes, setWindowOriginalSizes] = useState<Record<AppId, WindowSize>>({
     finder: { width: 0, height: 0 },
@@ -40,6 +47,7 @@ export default function Desktop() {
     projects: { width: 0, height: 0 },
     contact: { width: 0, height: 0 },
     apps: { width: 0, height: 0 },
+    resume: { width: 0, height: 0 },
   });
   const [isCompactMode, setIsCompactMode] = useState<Record<AppId, boolean>>({
     finder: false,
@@ -47,9 +55,14 @@ export default function Desktop() {
     projects: false,
     contact: false,
     apps: false,
+    resume: false,
   });
   const [fullscreenApps, setFullscreenApps] = useState<Set<AppId>>(new Set());
   const [minimizedApps, setMinimizedApps] = useState<Set<AppId>>(new Set());
+  const [selectedUserApp, setSelectedUserApp] = useState<UserApp | null>(null);
+  const [userAppWindowPosition, setUserAppWindowPosition] = useState<WindowPosition>({ x: 0, y: 0 });
+  const [showShutdownDialog, setShowShutdownDialog] = useState(false);
+  const [isShuttingDown, setIsShuttingDown] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<AppId, WindowPosition>>(() => {
     // Posiciones iniciales en columna vertical
     const initialPositions: Record<AppId, WindowPosition> = {} as Record<AppId, WindowPosition>;
@@ -81,6 +94,15 @@ export default function Desktop() {
       // Si la app está cerrada, abrirla
       setOpenApps((prev) => [...prev, id]);
       setActiveApp(id);
+      
+      // Si es la app de Launchpad, ponerla en fullscreen automáticamente
+      if (id === "apps") {
+        setFullscreenApps((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(id);
+          return newSet;
+        });
+      }
     }
   };
 
@@ -330,6 +352,7 @@ export default function Desktop() {
     detectConnectionType();
   }, []);
 
+
   // Formatear la hora
   const formatTime = (date: Date) => {
     const hours = date.getHours();
@@ -412,17 +435,33 @@ export default function Desktop() {
       {/* Top bar estilo macOS 2025 (tema oscuro) - oculto en fullscreen */}
       {!hasFullscreen && (
         <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-1.5 text-xs text-white/90 bg-black/40 backdrop-blur-2xl border-b border-white/10">
-          <div className="flex items-center gap-2.5">
-            <span className="text-base font-medium"></span>
-            <span className="font-medium">Marwil CampOS</span>
-            {openApps.length > 0 && (
-              <>
-                <span className="text-white/40">·</span>
-                <span className="font-medium text-white/80">
-                  {APPS.find((app) => app.id === activeApp)?.name || ""}
-                </span>
-              </>
-            )}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <AppleMenu onShutdown={() => setShowShutdownDialog(true)} />
+              <span className="font-medium">Marwil CampOS</span>
+              {openApps.length > 0 && (
+                <>
+                  <span className="text-white/40">·</span>
+                  <span className="font-medium text-white/80">
+                    {APPS.find((app) => app.id === activeApp)?.name || ""}
+                  </span>
+                </>
+              )}
+            </div>
+            <MenuBar 
+              activeApp={APPS.find((app) => app.id === activeApp)?.name}
+              onMinimize={() => {
+                if (activeApp) {
+                  toggleMinimize(activeApp);
+                }
+              }}
+              onFullscreen={() => {
+                if (activeApp) {
+                  toggleFullscreen(activeApp);
+                }
+              }}
+              isFullscreen={fullscreenApps.has(activeApp)}
+            />
           </div>
           <div className="flex items-center gap-5 text-white/80">
             <span className="flex items-center gap-1">
@@ -623,9 +662,86 @@ export default function Desktop() {
         </AppWindow>
       )}
 
+      {openApps.includes("resume") && (
+        <AppWindow
+          title="Resume"
+          onClose={() => closeApp("resume")}
+          onFocus={() => setActiveApp("resume")}
+          isActive={activeApp === "resume"}
+          position={windowPositions.resume}
+          onPositionChange={(pos) => handleWindowPositionChange("resume", pos)}
+          size={windowSizes.resume}
+          onSizeChange={(size) => handleWindowSizeChange("resume", size)}
+          isFullscreen={fullscreenApps.has("resume")}
+          onToggleFullscreen={() => toggleFullscreen("resume")}
+          isMinimized={minimizedApps.has("resume")}
+          onMinimize={() => toggleMinimize("resume")}
+          onToggleCompact={() => toggleWindowCompact("resume")}
+        >
+          <div className="flex flex-col items-center gap-6">
+            <div className="text-6xl">📄</div>
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-white mb-3">My Resume</h2>
+              <p className="text-gray-300 mb-6 max-w-md">
+                Download or view my resume/CV to learn more about my experience, skills, and qualifications.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="/resume.pdf"
+                  download
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span>Download PDF</span>
+                </a>
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                  <span>View Online</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </AppWindow>
+      )}
+
       {openApps.includes("apps") && (
         <AppWindow
-          title="Applications"
+          title=""
           onClose={() => closeApp("apps")}
           onFocus={() => setActiveApp("apps")}
           isActive={activeApp === "apps"}
@@ -639,25 +755,77 @@ export default function Desktop() {
           onMinimize={() => toggleMinimize("apps")}
           onToggleCompact={() => toggleWindowCompact("apps")}
         >
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-6">
-            {APPS.filter((app) => app.id !== "apps").map((app) => (
-              <button
-                key={app.id}
-                onClick={() => {
-                  toggleApp(app.id);
-                  setActiveApp(app.id);
-                }}
-                className="relative flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/10 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          <Launchpad
+            onAppClick={(app) => {
+              const windowWidth = 600;
+              const windowHeight = 500;
+              setUserAppWindowPosition({
+                x: (window.innerWidth - windowWidth) / 2,
+                y: (window.innerHeight - windowHeight) / 2,
+              });
+              setSelectedUserApp(app);
+            }}
+            onClose={() => closeApp("apps")}
+          />
+        </AppWindow>
+      )}
+
+      {/* Ventana de detalles de aplicación del usuario */}
+      {selectedUserApp && (
+        <AppWindow
+          title={selectedUserApp.name}
+          onClose={() => setSelectedUserApp(null)}
+          onFocus={() => {}}
+          isActive={true}
+          position={userAppWindowPosition}
+          onPositionChange={setUserAppWindowPosition}
+          size={{ width: 600, height: 500 }}
+          onSizeChange={() => {}}
+          isFullscreen={false}
+          onToggleFullscreen={() => {}}
+          isMinimized={false}
+          onMinimize={() => setSelectedUserApp(null)}
+          onToggleCompact={() => {}}
+        >
+          <div className="flex flex-col items-center gap-6">
+            <div className="text-7xl">{selectedUserApp.icon}</div>
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-white mb-3">{selectedUserApp.name}</h2>
+              <p className="text-gray-300 mb-4 max-w-md">{selectedUserApp.description}</p>
+              {selectedUserApp.technologies && selectedUserApp.technologies.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center mb-6">
+                  {selectedUserApp.technologies.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <a
+                href={selectedUserApp.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
               >
-                <div className="text-5xl mb-1">{app.icon}</div>
-                <span className="text-xs text-gray-200 text-center font-medium">
-                  {app.name}
-                </span>
-                {openApps.includes(app.id) && (
-                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500" />
-                )}
-              </button>
-            ))}
+                <span>Visitar aplicación</span>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            </div>
           </div>
         </AppWindow>
       )}
@@ -665,6 +833,31 @@ export default function Desktop() {
       {/* Dock - oculto en fullscreen */}
       {!hasFullscreen && (
         <Dock openApps={openApps} onToggleApp={toggleApp} />
+      )}
+
+      {/* Diálogo de confirmación de apagado */}
+      <ShutdownDialog
+        isOpen={showShutdownDialog}
+        onConfirm={() => {
+          setShowShutdownDialog(false);
+          setIsShuttingDown(true);
+          // Simular apagado con animación
+          setTimeout(() => {
+            // Aquí puedes recargar la página o mostrar una pantalla de apagado
+            window.location.reload();
+          }, 2000);
+        }}
+        onCancel={() => setShowShutdownDialog(false)}
+      />
+
+      {/* Pantalla de apagado */}
+      {isShuttingDown && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white/80 text-sm">Shutting down...</p>
+          </div>
+        </div>
       )}
     </div>
   );
