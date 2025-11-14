@@ -68,3 +68,30 @@ body {
   background-color: rgba(0, 122, 255, 0.4);
   color: #ffffff;
 }
+
+/* Animaciones para BootScreen */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-in;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.3s ease-out;
+}

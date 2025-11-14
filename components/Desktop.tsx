@@ -8,6 +8,8 @@ import Launchpad from "./Launchpad";
 import MenuBar from "./MenuBar";
 import AppleMenu from "./AppleMenu";
 import ShutdownDialog from "./ShutdownDialog";
+import LoginScreen from "./LoginScreen";
+import BootScreen from "./BootScreen";
 import type { AppId } from "@/lib/apps";
 import { APPS } from "@/lib/apps";
 import type { UserApp } from "@/lib/userApps";
@@ -64,6 +66,9 @@ export default function Desktop() {
   const [showShutdownDialog, setShowShutdownDialog] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
   const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // Inicializar como true para evitar hidratación
+  const [isMounted, setIsMounted] = useState(false);
+  const [isBooting, setIsBooting] = useState(true);
   const [iconPositions, setIconPositions] = useState<Record<AppId, WindowPosition>>(() => {
     // Posiciones iniciales en columna vertical
     const initialPositions: Record<AppId, WindowPosition> = {} as Record<AppId, WindowPosition>;
@@ -485,6 +490,59 @@ export default function Desktop() {
     );
   };
 
+  // Verificar localStorage solo en el cliente después del mount
+  // Esto es necesario para evitar errores de hidratación entre servidor y cliente
+  useEffect(() => {
+    setIsMounted(true);
+    const hasLoggedIn = localStorage.getItem("macOS_loggedIn") === "true";
+    setIsLoggedIn(hasLoggedIn);
+    // Si ya hay sesión iniciada, mostrar pantalla negra brevemente antes de mostrar el desktop
+    if (hasLoggedIn) {
+      // Esperar un momento para mostrar la pantalla negra
+      setTimeout(() => {
+        setIsBooting(false);
+      }, 500);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    localStorage.setItem("macOS_loggedIn", "true");
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    // Limpiar localStorage
+    localStorage.removeItem("macOS_loggedIn");
+    // Cerrar todas las ventanas abiertas
+    setOpenApps([]);
+    setMinimizedApps(new Set());
+    setFullscreenApps(new Set());
+    setSelectedUserApp(null);
+    // Cambiar estado de login
+    setIsLoggedIn(false);
+  };
+
+  const handleBootComplete = () => {
+    setIsBooting(false);
+  };
+
+  // Mostrar pantalla de boot solo si no hay sesión iniciada
+  if (isBooting && isMounted && !isLoggedIn) {
+    return <BootScreen onComplete={handleBootComplete} />;
+  }
+
+  // Si hay sesión iniciada, mostrar pantalla negra mientras carga
+  if (isBooting && isMounted && isLoggedIn) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-black" />
+    );
+  }
+
+  // Mostrar pantalla de login si no está logueado (solo después de verificar en el cliente)
+  if (isMounted && !isLoggedIn && !isBooting) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
   return (
     <div className="relative h-screen w-screen overflow-hidden">
       {/* Fondo con imagen real de macOS (tema oscuro) */}
@@ -506,7 +564,10 @@ export default function Desktop() {
         <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-1.5 text-xs text-white/90 bg-black/40 backdrop-blur-2xl border-b border-white/10">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2.5">
-              <AppleMenu onShutdown={() => setShowShutdownDialog(true)} />
+              <AppleMenu 
+                onShutdown={() => setShowShutdownDialog(true)} 
+                onLogout={handleLogout}
+              />
               <span className="font-medium">Marwil CampOS</span>
               {openApps.length > 0 && (
                 <>

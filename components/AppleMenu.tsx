@@ -13,9 +13,10 @@ type AppleMenuItem = {
 type AppleMenuProps = {
   onClose?: () => void;
   onShutdown?: () => void;
+  onLogout?: () => void;
 };
 
-export default function AppleMenu({ onClose, onShutdown }: AppleMenuProps) {
+export default function AppleMenu({ onClose, onShutdown, onLogout }: AppleMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +35,7 @@ export default function AppleMenu({ onClose, onShutdown }: AppleMenuProps) {
     { label: "Shut Down...", action: () => onShutdown?.() },
     { divider: true },
     { label: "Lock Screen", shortcut: "⌃⌘Q", action: () => console.log("Lock Screen") },
-    { label: "Log Out...", shortcut: "⇧⌘Q", action: () => console.log("Log Out") },
+    { label: "Log Out...", shortcut: "⇧⌘Q", action: () => onLogout?.() },
   ];
 
   useEffect(() => {
