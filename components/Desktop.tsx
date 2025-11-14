@@ -63,6 +63,7 @@ export default function Desktop() {
   const [userAppWindowPosition, setUserAppWindowPosition] = useState<WindowPosition>({ x: 0, y: 0 });
   const [showShutdownDialog, setShowShutdownDialog] = useState(false);
   const [isShuttingDown, setIsShuttingDown] = useState(false);
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<AppId, WindowPosition>>(() => {
     // Posiciones iniciales en columna vertical
     const initialPositions: Record<AppId, WindowPosition> = {} as Record<AppId, WindowPosition>;
@@ -352,6 +353,74 @@ export default function Desktop() {
     detectConnectionType();
   }, []);
 
+  // Detectar cambios en el fullscreen del navegador
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsBrowserFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, []);
+
+  // Función para alternar fullscreen del navegador
+  const toggleBrowserFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        // Entrar en fullscreen
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          // @ts-expect-error - WebKit fullscreen API no está tipada
+          const webkitRequestFullscreen = document.documentElement.webkitRequestFullscreen;
+          // @ts-expect-error - Mozilla fullscreen API no está tipada
+          const mozRequestFullScreen = document.documentElement.mozRequestFullScreen;
+          // @ts-expect-error - MS fullscreen API no está tipada
+          const msRequestFullscreen = document.documentElement.msRequestFullscreen;
+          
+          if (webkitRequestFullscreen) {
+            await webkitRequestFullscreen();
+          } else if (mozRequestFullScreen) {
+            await mozRequestFullScreen();
+          } else if (msRequestFullscreen) {
+            await msRequestFullscreen();
+          }
+        }
+      } else {
+        // Salir de fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else {
+          // @ts-expect-error - WebKit exitFullscreen API no está tipada
+          const webkitExitFullscreen = document.webkitExitFullscreen;
+          // @ts-expect-error - Mozilla cancelFullScreen API no está tipada
+          const mozCancelFullScreen = document.mozCancelFullScreen;
+          // @ts-expect-error - MS exitFullscreen API no está tipada
+          const msExitFullscreen = document.msExitFullscreen;
+          
+          if (webkitExitFullscreen) {
+            await webkitExitFullscreen();
+          } else if (mozCancelFullScreen) {
+            await mozCancelFullScreen();
+          } else if (msExitFullscreen) {
+            await msExitFullscreen();
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling fullscreen:", error);
+    }
+  };
+
 
   // Formatear la hora
   const formatTime = (date: Date) => {
@@ -455,12 +524,8 @@ export default function Desktop() {
                   toggleMinimize(activeApp);
                 }
               }}
-              onFullscreen={() => {
-                if (activeApp) {
-                  toggleFullscreen(activeApp);
-                }
-              }}
-              isFullscreen={fullscreenApps.has(activeApp)}
+              onFullscreen={toggleBrowserFullscreen}
+              isFullscreen={isBrowserFullscreen}
             />
           </div>
           <div className="flex items-center gap-5 text-white/80">
