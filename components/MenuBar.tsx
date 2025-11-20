@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 
 type MenuItem = {
-  label: string;
+  label?: string;
   action?: () => void;
   shortcut?: string;
   divider?: boolean;
@@ -33,26 +33,26 @@ export default function MenuBar({ activeApp, onMinimize, onFullscreen, isFullscr
       items: [
         { label: "New Window", shortcut: "⌘N", action: () => console.log("New Window") },
         { label: "New Tab", shortcut: "⌘T", action: () => console.log("New Tab") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Open...", shortcut: "⌘O", action: () => console.log("Open") },
         { label: "Open Recent", action: () => console.log("Open Recent") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Close Window", shortcut: "⌘W", action: () => console.log("Close Window") },
         { label: "Close Tab", shortcut: "⌘W", action: () => console.log("Close Tab") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Get Info", shortcut: "⌘I", action: () => console.log("Get Info") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Compress", action: () => console.log("Compress") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Duplicate", shortcut: "⌘D", action: () => console.log("Duplicate") },
         { label: "Make Alias", shortcut: "⌘L", action: () => console.log("Make Alias") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Quick Look", shortcut: "⌘Y", action: () => console.log("Quick Look") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Show Original", shortcut: "⌘R", action: () => console.log("Show Original") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Move to Trash", shortcut: "⌘⌫", action: () => console.log("Move to Trash") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Eject", shortcut: "⌘E", action: () => console.log("Eject") },
       ],
     },
@@ -61,14 +61,14 @@ export default function MenuBar({ activeApp, onMinimize, onFullscreen, isFullscr
       items: [
         { label: "Undo", shortcut: "⌘Z", disabled: true },
         { label: "Redo", shortcut: "⇧⌘Z", disabled: true },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Cut", shortcut: "⌘X", disabled: true },
         { label: "Copy", shortcut: "⌘C", disabled: true },
         { label: "Paste", shortcut: "⌘V", disabled: true },
         { label: "Select All", shortcut: "⌘A", action: () => console.log("Select All") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Show Clipboard", action: () => console.log("Show Clipboard") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Start Dictation...", shortcut: "⌃⌘D", action: () => console.log("Start Dictation") },
         { label: "Emoji & Symbols", shortcut: "⌃⌘Space", action: () => console.log("Emoji & Symbols") },
       ],
@@ -80,12 +80,12 @@ export default function MenuBar({ activeApp, onMinimize, onFullscreen, isFullscr
         { label: "as List", shortcut: "⌘2", action: () => console.log("as List") },
         { label: "as Columns", shortcut: "⌘3", action: () => console.log("as Columns") },
         { label: "as Gallery", shortcut: "⌘4", action: () => console.log("as Gallery") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Use Stacks", shortcut: "⌃⌘0", action: () => console.log("Use Stacks") },
         { label: "Sort By", action: () => console.log("Sort By") },
         { label: "Clean Up", action: () => console.log("Clean Up") },
         { label: "Clean Up By", action: () => console.log("Clean Up By") },
-        { divider: true },
+        { divider: true, label: "" },
         { label: "Hide Sidebar", shortcut: "⌃⌘S", action: () => console.log("Hide Sidebar") },
         { label: "Show Preview", shortcut: "⇧⌘P", action: () => console.log("Show Preview") },
         { divider: true },
@@ -182,7 +182,7 @@ export default function MenuBar({ activeApp, onMinimize, onFullscreen, isFullscr
   return (
     <div className="flex items-center gap-1">
       {menus.map((menu) => (
-        <div key={menu.label} className="relative" ref={(el) => (menuRefs.current[menu.label] = el)}>
+        <div key={menu.label} className="relative" ref={(el) => { if (el) menuRefs.current[menu.label] = el; }}>
           <button
             onClick={() => handleMenuClick(menu.label)}
             className={`px-2 py-1 rounded text-xs font-medium transition-colors ${

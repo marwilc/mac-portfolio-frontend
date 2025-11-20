@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 
 type AppleMenuItem = {
-  label: string;
+  label?: string;
   action?: () => void;
   shortcut?: string;
   divider?: boolean;
@@ -22,18 +22,18 @@ export default function AppleMenu({ onClose, onShutdown, onLogout }: AppleMenuPr
 
   const menuItems: AppleMenuItem[] = [
     { label: "About This Mac", action: () => console.log("About This Mac") },
-    { divider: true },
+    { divider: true, label: "" },
     { label: "System Settings...", action: () => console.log("System Settings") },
     { label: "App Store...", action: () => console.log("App Store") },
-    { divider: true },
+    { divider: true, label: "" },
     { label: "Recent Items", action: () => console.log("Recent Items") },
-    { divider: true },
+    { divider: true, label: "" },
     { label: "Force Quit...", shortcut: "⌥⌘⎋", action: () => console.log("Force Quit") },
-    { divider: true },
+    { divider: true, label: "" },
     { label: "Sleep", action: () => console.log("Sleep") },
     { label: "Restart...", action: () => console.log("Restart") },
     { label: "Shut Down...", action: () => onShutdown?.() },
-    { divider: true },
+    { divider: true, label: "" },
     { label: "Lock Screen", shortcut: "⌃⌘Q", action: () => console.log("Lock Screen") },
     { label: "Log Out...", shortcut: "⇧⌘Q", action: () => onLogout?.() },
   ];
