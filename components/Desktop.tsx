@@ -87,6 +87,8 @@ export default function Desktop() {
         return newSet;
       });
       setActiveApp(id);
+      // Cerrar todas las demás ventanas
+      setOpenApps([id]);
       return;
     }
 
@@ -97,9 +99,25 @@ export default function Desktop() {
         setActiveApp(openApps[0] as AppId);
       }
     } else {
-      // Si la app está cerrada, abrirla
-      setOpenApps((prev) => [...prev, id]);
-    setActiveApp(id);
+      // Si la app está cerrada, abrirla y cerrar todas las demás
+      // Cerrar todas las ventanas abiertas primero
+      const previousApps = [...openApps];
+      previousApps.forEach((appId) => {
+        setFullscreenApps((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(appId);
+          return newSet;
+        });
+        setMinimizedApps((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(appId);
+          return newSet;
+        });
+      });
+      
+      // Abrir solo la nueva ventana
+      setOpenApps([id]);
+      setActiveApp(id);
       
       // Si es la app de Launchpad, ponerla en fullscreen automáticamente
       if (id === "apps") {
@@ -998,6 +1016,22 @@ export default function Desktop() {
         >
           <Launchpad
             onAppClick={(app) => {
+              // Cerrar todas las ventanas abiertas
+              const previousApps = [...openApps];
+              previousApps.forEach((appId) => {
+                setFullscreenApps((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(appId);
+                  return newSet;
+                });
+                setMinimizedApps((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(appId);
+                  return newSet;
+                });
+              });
+              setOpenApps([]);
+              
               const windowWidth = 600;
               const windowHeight = 500;
               setUserAppWindowPosition({
