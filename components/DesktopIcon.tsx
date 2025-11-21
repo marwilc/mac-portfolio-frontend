@@ -127,13 +127,13 @@ export default function DesktopIcon({ app, onClick, position, onPositionChange }
       onMouseUp={handleMouseUp}
     >
       <button
-        className="group flex flex-col items-center gap-1.5 w-20 p-2 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-move active:cursor-grabbing"
+        className="group flex flex-col items-center gap-1.5 w-20 p-2 rounded-lg hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-move active:cursor-grabbing"
         onDoubleClick={onClick}
       >
-        <div className="flex h-16 w-16 items-center justify-center text-4xl transition-transform group-hover:scale-110 group-active:scale-95">
+        <div className="flex h-16 w-16 items-center justify-center text-4xl transition-transform group-hover:scale-110 group-active:scale-95 opacity-90">
           {app.icon}
         </div>
-        <span className="text-xs text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-center px-1 rounded group-hover:bg-white/20 transition-colors">
+        <span className="text-xs text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-center px-1 rounded group-hover:bg-white/10 transition-colors">
           {app.name}
         </span>
       </button>
