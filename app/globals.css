@@ -112,3 +112,48 @@ body {
 .pr-safe {
   padding-right: env(safe-area-inset-right);
 }
+
+/* Dynamic Island equalizer animation */
+@keyframes equalizer-1 {
+  0%, 100% { height: 40%; }
+  25% { height: 80%; }
+  50% { height: 60%; }
+  75% { height: 100%; }
+}
+
+@keyframes equalizer-2 {
+  0%, 100% { height: 100%; }
+  25% { height: 60%; }
+  50% { height: 80%; }
+  75% { height: 40%; }
+}
+
+@keyframes equalizer-3 {
+  0%, 100% { height: 80%; }
+  25% { height: 40%; }
+  50% { height: 100%; }
+  75% { height: 60%; }
+}
+
+@keyframes equalizer-4 {
+  0%, 100% { height: 60%; }
+  25% { height: 100%; }
+  50% { height: 40%; }
+  75% { height: 80%; }
+}
+
+.equalizer-bar-1 {
+  animation: equalizer-1 1s ease-in-out infinite;
+}
+
+.equalizer-bar-2 {
+  animation: equalizer-2 1.2s ease-in-out infinite;
+}
+
+.equalizer-bar-3 {
+  animation: equalizer-3 0.9s ease-in-out infinite;
+}
+
+.equalizer-bar-4 {
+  animation: equalizer-4 1.1s ease-in-out infinite;
+}
