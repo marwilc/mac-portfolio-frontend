@@ -67,7 +67,7 @@ export default function HomeScreen({ onAppOpen, onUserAppOpen }: HomeScreenProps
           </svg>
           <input
             type="text"
-            placeholder="Buscar"
+                    placeholder="Search"
             className="flex-1 bg-transparent text-white placeholder-white/60 text-base outline-none"
           />
         </div>
