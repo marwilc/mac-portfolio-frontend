@@ -49,49 +49,26 @@ export default function StatusBar() {
     });
   };
 
-  const getBatteryIcon = () => {
-    if (batteryLevel === null) return null;
-    
-    if (isCharging) {
-      return (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M15.67 4H14V2c0-.55-.45-1-1-1h-2c-.55 0-1 .45-1 1v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zm-1.06 9.24l-2.67 4.4c-.2.33-.67.33-.87 0l-2.67-4.4c-.2-.33.02-.74.43-.74h5.34c.41 0 .63.41.43.74z"/>
-        </svg>
-      );
-    }
-
-    const level = batteryLevel || 0;
-    if (level > 75) {
-      return "🔋";
-    } else if (level > 50) {
-      return "🔋";
-    } else if (level > 25) {
-      return "🔋";
-    } else {
-      return "🔋";
-    }
-  };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 pt-safe pb-1.5 text-white text-[13px] font-semibold">
-      <div className="flex items-center gap-1">
-        <span>{formatTime(currentTime)}</span>
+    <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 pt-safe pb-1.5 text-white text-[13px] font-semibold pointer-events-none">
+      <div className="flex items-center gap-1 pointer-events-auto">
+        <span className="select-none">{formatTime(currentTime)}</span>
       </div>
-      <div className="flex items-center gap-2">
-        {/* Señal de red */}
-        <svg className="w-[17px] h-[11px]" viewBox="0 0 24 16" fill="currentColor">
-          <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
-        </svg>
-        {/* WiFi */}
-        <svg className="w-[15px] h-[11px]" viewBox="0 0 24 16" fill="currentColor">
-          <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+      <div className="flex items-center gap-2 pointer-events-auto">
+        {/* WiFi/Signal - Icono estilo iOS */}
+        <svg className="w-[17px] h-[12px]" viewBox="0 0 17 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8.5 0.5C4.5 0.5 1.5 3.5 1.5 7.5" />
+          <path d="M8.5 3c-2 0-3.5 1.5-3.5 3.5" />
+          <path d="M8.5 5.5c-0.8 0-1.2 0.8-1.2 1.2" />
+          <circle cx="8.5" cy="7.5" r="0.5" fill="currentColor" />
         </svg>
         {/* Batería */}
         {batteryLevel !== null && (
-          <div className="flex items-center gap-1">
-            <svg className="w-[24px] h-[11px]" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="1" y="3" width="18" height="6" rx="1" />
-              <rect x="19" y="5" width="2" height="2" rx="0.5" />
+          <div className="flex items-center gap-0.5 relative">
+            <svg className="w-[24px] h-[12px]" viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1.2">
+              <rect x="1" y="3" width="18" height="6" rx="1.2" />
+              <rect x="19" y="5" width="2" height="2" rx="0.4" fill="currentColor" />
               <rect 
                 x="2.5" 
                 y="4.5" 
@@ -102,8 +79,8 @@ export default function StatusBar() {
               />
             </svg>
             {isCharging && (
-              <svg className="w-3 h-3 absolute" viewBox="0 0 12 12" fill="currentColor">
-                <path d="M6 2L4 6h2v4l2-4H6V2z"/>
+              <svg className="w-2.5 h-2.5 absolute left-[4px] top-[2px]" viewBox="0 0 8 8" fill="currentColor">
+                <path d="M4 1L2.5 4h1.5v3l1.5-3H4V1z"/>
               </svg>
             )}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { AppId } from "@/lib/apps";
 import { APPS } from "@/lib/apps";
 import type { UserApp } from "@/lib/userApps";
@@ -12,6 +12,10 @@ type iOSAppProps = {
 };
 
 export default function IosApp({ appId, userApp, onClose }: iOSAppProps) {
+  const [swipeStart, setSwipeStart] = useState<{ y: number; time: number } | null>(null);
+  const [swipeDistance, setSwipeDistance] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     // Prevenir scroll del body cuando la app está abierta
     document.body.style.overflow = "hidden";
@@ -19,6 +23,50 @@ export default function IosApp({ appId, userApp, onClose }: iOSAppProps) {
       document.body.style.overflow = "auto";
     };
   }, []);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    // Solo iniciar el gesto si comienza cerca del borde inferior (últimos 100px)
+    if (touch.clientY > window.innerHeight - 100) {
+      setSwipeStart({
+        y: touch.clientY,
+        time: Date.now(),
+      });
+      setSwipeDistance(0);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!swipeStart) return;
+    
+    const touch = e.touches[0];
+    const distance = swipeStart.y - touch.clientY; // Distancia hacia arriba (positiva)
+    
+    // Solo permitir movimiento hacia arriba
+    if (distance > 0) {
+      setSwipeDistance(distance);
+      // Prevenir scroll mientras se hace el gesto
+      e.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!swipeStart) return;
+
+    const swipeDuration = Date.now() - swipeStart.time;
+    const swipeSpeed = swipeDistance / swipeDuration; // píxeles por milisegundo
+    const threshold = 100; // Distancia mínima en píxeles
+    const speedThreshold = 0.3; // Velocidad mínima
+
+    // Cerrar si se deslizó lo suficiente o con suficiente velocidad
+    if (swipeDistance > threshold || (swipeDistance > 50 && swipeSpeed > speedThreshold)) {
+      onClose();
+    }
+
+    // Resetear el estado
+    setSwipeStart(null);
+    setSwipeDistance(0);
+  };
 
   const app = appId ? APPS.find((a) => a.id === appId) : null;
   const title = app?.name || userApp?.name || "App";
@@ -185,27 +233,24 @@ export default function IosApp({ appId, userApp, onClose }: iOSAppProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-40 bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-fade-in">
-      {/* Status bar superior */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 pt-safe pb-2 text-white text-xs">
-        <div className="flex items-center gap-1">
-          <span>{new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: false })}</span>
-        </div>
-        <button
-          onClick={onClose}
-          className="px-5 py-1.5 bg-white/20 backdrop-blur-xl rounded-full text-white text-sm font-semibold active:scale-95 transition-transform"
-        >
-          Done
-        </button>
-      </div>
-
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-40 bg-gradient-to-br from-gray-900 via-gray-800 to-black animate-fade-in"
+      style={{
+        transform: swipeDistance > 0 ? `translateY(-${swipeDistance}px)` : "translateY(0)",
+        transition: swipeStart ? "none" : "transform 0.3s ease-out",
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Contenido de la app */}
-      <div className="pt-16 h-full overflow-hidden">
+      <div className="pt-16 pb-24 h-full overflow-hidden">
         {renderContent()}
       </div>
 
-      {/* Indicador de swipe para cerrar estilo iOS */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-white/40 rounded-full" />
+      {/* Indicador de swipe para cerrar estilo iOS - pegado abajo */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-white/40 rounded-full z-[60]" />
     </div>
   );
 }
