@@ -154,6 +154,20 @@ export default function IosApp({ appId, userApp, onClose }: iOSAppProps) {
                     Responsive admin dashboard template with data visualization and user management features.
                   </p>
                 </div>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-6">
+                  <h3 className="text-xl font-semibold text-white mb-2">Documents Web App ☁️</h3>
+                  <p className="text-white/80">
+                    Cloud storage platform similar to Google Drive with a built-in document editor module like Google Docs. Store and manage your files in the cloud with collaborative editing capabilities.
+                  </p>
+                  <a
+                    href="https://www.marwilc.xyz/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium"
+                  >
+                    Visitar proyecto →
+                  </a>
+                </div>
               </div>
             </div>
           </div>

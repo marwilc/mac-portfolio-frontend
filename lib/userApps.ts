@@ -32,5 +32,13 @@ export const USER_APPS: UserApp[] = [
     url: "https://example.com/admin-dashboard",
     technologies: ["React", "Tailwind CSS", "Chart.js"],
   },
+  {
+    id: "marwilc",
+    name: "Documents Web App",
+    icon: "☁️",
+    description: "Cloud storage platform similar to Google Drive with a built-in document editor module like Google Docs. Store and manage your files in the cloud with collaborative editing capabilities.",
+    url: "https://www.marwilc.xyz/",
+    technologies: ["Angular", "NestJS", "PostgreSQL", "WebSockets"],
+  },
 ];
 

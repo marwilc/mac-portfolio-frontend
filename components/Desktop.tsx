@@ -99,7 +99,7 @@ export default function Desktop() {
     } else {
       // Si la app está cerrada, abrirla
       setOpenApps((prev) => [...prev, id]);
-      setActiveApp(id);
+    setActiveApp(id);
       
       // Si es la app de Launchpad, ponerla en fullscreen automáticamente
       if (id === "apps") {
@@ -551,7 +551,7 @@ export default function Desktop() {
         style={{
           backgroundImage: `url(${wallpaperUrl})`,
         }}
-      >
+    >
         {/* Overlay sutil para mejorar contraste y legibilidad */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
       </div>
@@ -728,6 +728,20 @@ export default function Desktop() {
               <p className="text-gray-300">
                 Modern analytics dashboard using React, Tailwind and charts.
               </p>
+            </li>
+            <li>
+              <h3 className="font-semibold text-white">Documents Web App ☁️</h3>
+              <p className="text-gray-300">
+                Cloud storage platform similar to Google Drive with a built-in document editor module like Google Docs. Built with Angular, NestJS, PostgreSQL and WebSockets for real-time collaboration.
+              </p>
+              <a
+                href="https://www.marwilc.xyz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 text-sm font-medium mt-1 inline-block"
+              >
+                Visitar proyecto →
+              </a>
             </li>
           </ul>
         </AppWindow>
@@ -958,7 +972,7 @@ export default function Desktop() {
 
       {/* Dock - oculto en fullscreen */}
       {!hasFullscreen && (
-        <Dock openApps={openApps} onToggleApp={toggleApp} />
+      <Dock openApps={openApps} onToggleApp={toggleApp} />
       )}
 
       {/* Diálogo de confirmación de apagado */}
